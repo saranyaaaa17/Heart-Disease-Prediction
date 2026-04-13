@@ -1,0 +1,18 @@
+# Node
+node_modules/
+dist/
+.env
+
+# Python
+__pycache__/
+*.pyc
+venv/
+env/
+.pytest_cache/
+
+# Local model & cache files
+*.pkl
+
+# OS
+.DS_Store
+Thumbs.db
