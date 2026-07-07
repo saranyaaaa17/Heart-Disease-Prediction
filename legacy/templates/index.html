@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heart Disease Prediction</title>
+    <!-- Use Tailwind CSS for rapid styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0f172a;
+            color: #f8fafc;
+        }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+        }
+        .form-input {
+            width: 100%;
+            padding: 0.6rem 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background-color: rgba(15, 23, 42, 0.6);
+            color: white;
+            transition: all 0.2s;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+        }
+        .form-input option {
+            background-color: #1e293b;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569; 
+        }
+    </style>
+</head>
+<body class="min-h-screen py-8 px-4 flex justify-center">
+    
+    <div class="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- Header & Form Section -->
+        <div class="lg:col-span-7 flex flex-col gap-6">
+            <div class="glass-panel p-8 text-center relative overflow-hidden">
+                <div class="absolute -top-24 -right-24 w-48 h-48 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
+                <div class="absolute -bottom-24 -left-24 w-48 h-48 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
+                <h1 class="text-4xl font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">Heart Health AI</h1>
+                <p class="text-slate-400">Powered by Logistic Regression Model</p>
+            </div>
+
+            <div class="glass-panel p-8">
+                <h2 class="text-2xl font-semibold mb-6 flex items-center justify-between">
+                    <span class="flex items-center gap-2">
+                        <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                        Patient Metrics
+                    </span>
+                    <!-- Optional quick reset link, but form naturally renders empty anyway -->
+                    <a href="{{ url_for('home') }}" class="text-sm text-slate-400 hover:text-slate-200 transition">Clear Form</a>
+                </h2>
+                <form action="{{ url_for('predict')}}" method="post">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-300 mb-1">Age (Years)</label>
+                            <input type="number" name="age" required class="form-input" placeholder="e.g. 45">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-300 mb-1">Gender</label>
+                            <select name="gender" required class="form-input">
+                                <option value="" disabled selected>Select Gender</option>
+                                <option value="1">Male</option>
+                                <option value="0">Female</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-300 mb-1">Height (cm)</label>
+                            <input type="number" name="height" required class="form-input" placeholder="e.g. 170">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-300 mb-1">Weight (kg)</label>
+                            <input type="number" name="weight" step="0.1" required class="form-input" placeholder="e.g. 70.5">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-300 mb-1">Systolic BP</label>
+                            <input type="number" name="ap_hi" required class="form-input" placeholder="e.g. 120">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-300 mb-1">Diastolic BP</label>
+                            <input type="number" name="ap_lo" required class="form-input" placeholder="e.g. 80">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-300 mb-1">Cholesterol Label</label>
+                            <select name="cholesterol" required class="form-input">
+                                <option value="1" selected>Normal</option>
+                                <option value="2">Above Normal</option>
+                                <option value="3">Well Above Normal</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-300 mb-1">Glucose Level</label>
+                            <select name="gluc" required class="form-input">
+                                <option value="1" selected>Normal</option>
+                                <option value="2">Above Normal</option>
+                                <option value="3">Well Above Normal</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-300 mb-1">Do you smoke?</label>
+                            <select name="smoke" required class="form-input">
+                                <option value="0" selected>No</option>
+                                <option value="1">Yes</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-300 mb-1">Alcohol consumption?</label>
+                            <select name="alco" required class="form-input">
+                                <option value="0" selected>No</option>
+                                <option value="1">Yes</option>
+                            </select>
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="block text-sm font-medium text-slate-300 mb-1">Are you physically active?</label>
+                            <select name="active" required class="form-input">
+                                <option value="1" selected>Yes</option>
+                                <option value="0">No</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 flex gap-4">
+                        <button type="submit" class="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-3 px-6 rounded-lg shadow-[0_0_15px_rgba(79,70,229,0.5)] transition duration-300 ease-in-out transform hover:-translate-y-1">
+                            Run Analysis
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Results & Insights Section -->
+        <div class="lg:col-span-5 flex flex-col gap-6">
+            
+            <!-- Result Card -->
+            {% if prediction_text %}
+            <div class="glass-panel p-6 border-l-4 {{ 'border-red-500' if 'High' in prediction_text and 'Error' not in prediction_text else 'border-emerald-500' if 'Low' in prediction_text else 'border-gray-500' }}">
+                <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    Prediction Results
+                </h3>
+                
+                <div class="mb-6 flex justify-between items-end">
+                    <div>
+                        <p class="text-sm text-slate-400 uppercase tracking-wide">Status</p>
+                        <p class="text-2xl font-bold {{ 'text-red-400' if 'High' in prediction_text and 'Error' not in prediction_text else 'text-emerald-400' if 'Low' in prediction_text else 'text-gray-300' }}">{{ prediction_text }}</p>
+                    </div>
+                    {% if probability %}
+                    <div class="text-right">
+                        <p class="text-sm text-slate-400 uppercase tracking-wide">Risk Confidence</p>
+                        <p class="text-3xl font-bold text-white">{{ probability }}<span class="text-lg text-slate-400">%</span></p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                {% if probability %}
+                <div class="w-full bg-slate-700 rounded-full h-3 mb-2">
+                    <div class="h-3 rounded-full {{ 'bg-red-500' if probability > 50 else 'bg-emerald-500' }} transition-all duration-1000 ease-out" style="width: 0%" id="riskBar"></div>
+                </div>
+                <div class="flex justify-between text-xs text-slate-400">
+                    <span>Healthy (0%)</span>
+                    <span>At Risk (100%)</span>
+                </div>
+                <!-- Action button to clear form cleanly -->
+                <div class="mt-6 text-center">
+                   <a href="{{ url_for('home') }}" class="inline-block bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-medium py-2 px-6 rounded-full transition-colors border border-slate-600">Scan Next Patient</a>
+                </div>
+                <script>
+                    setTimeout(() => {
+                        document.getElementById('riskBar').style.width = '{{ probability }}%';
+                    }, 300);
+                </script>
+                {% endif %}
+            </div>
+            {% else %}
+            <!-- Placeholder before submission -->
+            <div class="glass-panel p-6 flex flex-col items-center justify-center text-center h-48 opacity-70">
+                <svg class="w-12 h-12 text-slate-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <p class="text-slate-400">Enter metrics and run analysis to see predictions here.</p>
+            </div>
+            {% endif %}
+
+            <!-- Under the Hood / Model Explainability -->
+            <div class="glass-panel p-6 flex-1 flex flex-col">
+                <h3 class="text-xl font-bold mb-1 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                    Model Explainability
+                </h3>
+                <p class="text-sm text-slate-400 mb-6">Feature importance based on model parameters.</p>
+                
+                <div class="flex-1 w-full relative min-h-[300px]">
+                    <canvas id="coefChart"></canvas>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Script rendering data for Chart.js -->
+    <script>
+        {% if coefs and features %}
+        const features = {{ features | tojson | safe }};
+        const coefs = {{ coefs | tojson | safe }};
+        
+        // Find absolute max for scaling colors
+        const maxAbs = Math.max(...coefs.map(Math.abs));
+
+        // Generate colors dynamically - Red for positive risk factors, Green/Blue for negative
+        const colors = coefs.map(c => {
+            const intensity = 0.4 + (Math.abs(c) / maxAbs) * 0.6; // 0.4 to 1.0 opacity
+            return c >= 0 ? `rgba(239, 68, 68, ${intensity})` : `rgba(16, 185, 129, ${intensity})`; // Tailwind red-500 : emerald-500
+        });
+
+        const ctx = document.getElementById('coefChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: features,
+                datasets: [{
+                    label: 'Impact on Risk',
+                    data: coefs,
+                    backgroundColor: colors,
+                    borderRadius: 4,
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let val = context.raw;
+                                return (val > 0 ? "Increases risk by: " : "Reduces risk by: ") + Math.abs(val).toFixed(3);
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                        ticks: { color: '#94a3b8' }
+                    },
+                    y: {
+                        grid: { display: false },
+                        ticks: { color: '#cbd5e1' }
+                    }
+                }
+            }
+        });
+        {% else %}
+        // If data isn't passed, we can gracefully leave the canvas blank or show a message
+        {% endif %}
+    </script>
+</body>
+</html>
