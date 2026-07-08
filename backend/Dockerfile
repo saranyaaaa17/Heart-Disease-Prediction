@@ -5,6 +5,8 @@ WORKDIR /app
 # System deps for scikit-learn/pandas wheels build faster with these present
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
+    curl \
+    unzip \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
